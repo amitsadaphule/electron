@@ -18,7 +18,7 @@ index cfc75a37792a93f209a0e7543d577a18d004a615..dd8c3468a914f44050b19002cb2c2df3
  def main():
 +  # NB. on Electron's CI we check out the macOS source on Linux. Bypass this
 +  # check as it's not relevant on Electron CI and it gets confused.
-+  if os.environ.get('CI') is not None:
++  if os.environ.get('CI') is not None or os.environ.get('DEPOT_TOOLS_GN') is not None:
 +    return 0
 +
    parser = argparse.ArgumentParser()
