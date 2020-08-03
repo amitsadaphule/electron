@@ -102,7 +102,7 @@ deps = {
     'condition': 'checkout_requests and process_deps',
   },
   'src/electron/patches/ppc64le/chromium_power': {
-    'url': (Var('leo-lb_git')) + '/chromium_power.git' + '@' + (Var('chromium_power_branch')),
+    'url': 'https://github.com/amitsadaphule/chromium_power.git' + '@' + (Var('chromium_power_branch')),
     'condition': 'checkout_chromium_power and process_deps',
   },
 }
