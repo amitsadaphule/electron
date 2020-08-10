@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "#####################"
-echo "IT IS RECOMMENDED TO RUN THIS BUILD SCRIPT ON UBUNTU XENIAL OR FEDORA 30!"
+echo "IT IS RECOMMENDED TO RUN THIS BUILD SCRIPT ON UBUNTU XENIAL/BIONIC OR FEDORA 30!"
 echo "#####################"
 echo "If any error occurs, please refer to https://wiki.raptorcs.com/wiki/Porting/Chromium for missing dependencies or others."
 echo "#####################"
@@ -12,8 +12,9 @@ set -eux
 OS=$NAME
 OSVER=$VERSION_ID
 
-if [[ $OS == "Ubuntu" ]] && [[ $OSVER == "16.04" ]]
+if [[ $OS == "Ubuntu" ]] && { [[ $OSVER == "16.04" ]] || [[ $OSVER == "18.04" ]]; };
 then
+    sudo -s <<EOF
     apt-get update -y
     apt-get install -y build-essential clang git vim cmake python bzip2 tar pkg-config libcups2-dev pkg-config libnss3-dev libssl-dev libglib2.0-dev libgnome-keyring-dev libpango1.0-dev libdbus-1-dev libatk1.0-dev libatk-bridge2.0-dev libgtk-3-dev libkrb5-dev libpulse-dev libxss-dev re2c subversion curl libasound2-dev libpci-dev mesa-common-dev gperf bison uuid-dev clang-format libatspi2.0-dev libnotify-dev libgconf2-dev libcap-dev libxtst-dev libxss1 python-dbusmock openjdk-8-jre clang-format wget libnotify-dev
 
@@ -21,7 +22,16 @@ then
     add-apt-repository ppa:deadsnakes/ppa -y
     apt-get update -y
     apt-get install -y python3.7
-    ln -sf /usr/bin/python3.7 /usr/bin/python3
+
+    if [[ $OSVER == "16.04" ]]
+    then
+        update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.5 1
+        update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2
+    else
+        update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
+        update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2
+    fi
+EOF
 
     git clone https://github.com/ninja-build/ninja
     cd ninja
@@ -31,8 +41,10 @@ then
     cd ..
 elif [[ $OS == "Fedora" ]] && [[ $OSVER == "30" ]]
 then
+    sudo -s <<EOF
     # Install dependencies
     dnf install -y git wget python bzip2 tar pkgconfig atk-devel alsa-lib-devel bison binutils brlapi-devel bluez-libs-devel bzip2-devel cairo-devel cups-devel dbus-devel dbus-glib-devel expat-devel fontconfig-devel freetype-devel gcc-c++ glib2-devel glibc gperf gtk3-devel java-1.*.0-openjdk-devel libatomic libcap-devel libffi-devel libgcc libgnome-keyring-devel libjpeg-devel libstdc++ libX11-devel libXScrnSaver-devel libXtst-devel libxkbcommon-x11-devel ncurses-compat-libs nspr-devel nss-devel pam-devel pango-devel pciutils-devel pulseaudio-libs-devel zlib httpd mod_ssl php php-cli python-psutil wdiff xorg-x11-server-Xvfb clang vim cmake pkg-config krb5-devel re2c subversion curl libuuid-devel ninja-build libva-devel ccache xz patch diffutils findutils coreutils @development-tools elfutils rpm-devel rpm rpm-build fakeroot libgbm-devel libXcomposite gdk-pixbuf2-devel libnotify-devel
+EOF
 else
     echo "Unsupported OS, please consider installing/building respective dependencies!"
     exit 0
@@ -44,7 +56,6 @@ DISTRO=linux-ppc64le
 wget "https://nodejs.org/dist/$VERSION/node-$VERSION-$DISTRO.tar.xz"
 tar -xJvf node-$VERSION-$DISTRO.tar.xz
 PATH=$(pwd)/node-$VERSION-$DISTRO/bin:$PATH
-ln -sf $(pwd)/node-$VERSION-$DISTRO/bin/node /usr/bin/node
 
 git clone https://gn.googlesource.com/gn
 cd gn
